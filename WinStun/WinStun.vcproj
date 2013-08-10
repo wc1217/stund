@@ -92,7 +92,7 @@
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
-				OptimizeReferences="2"
+				OptimizeReferences="0"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
 			<Tool
@@ -189,9 +189,6 @@
 			</File>
 			<File
 				RelativePath="WinStun.rc">
-			</File>
-			<File
-				RelativePath="res\WinStun.rc2">
 			</File>
 		</Filter>
 	</Files>
