@@ -16,10 +16,10 @@
 
 class CAboutDlg : public CDialog {
 public:
-    CAboutDlg();
+    // CAboutDlg();
 
     // Dialog Data
-    enum { IDD = IDD_ABOUTBOX };
+    //enum { IDD = IDD_ABOUTBOX };
 
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -28,7 +28,7 @@ protected:
 protected:
     DECLARE_MESSAGE_MAP()
 };
-
+/*
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD) {
 }
 
@@ -38,7 +38,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
-
+*/
 
 // CWinStunDlg dialog
 
@@ -54,6 +54,7 @@ void CWinStunDlg::DoDataExchange(CDataExchange* pDX) {
     mServerName = _T("stun.qq.com");
     CDialog::DoDataExchange(pDX);
     DDX_Text(pDX, IDC_SERVER, mServerName);
+    DDX_Text(pDX, IDC_RESULT, CString(_T("准备就绪..")));
     DDV_MaxChars(pDX, mServerName, 128);
 }
 
@@ -72,6 +73,7 @@ BOOL CWinStunDlg::OnInitDialog() {
     CDialog::OnInitDialog();
     // Add "About..." menu item to system menu.
     // IDM_ABOUTBOX must be in the system command range.
+    /*
     ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
     ASSERT(IDM_ABOUTBOX < 0xF000);
     CMenu* pSysMenu = GetSystemMenu(FALSE);
@@ -85,7 +87,7 @@ BOOL CWinStunDlg::OnInitDialog() {
             pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
         }
     }
-
+    */
     // Set the icon for this dialog.  The framework does this automatically
     //  when the application's main window is not a dialog
     SetIcon(m_hIcon, TRUE);         // Set big icon
@@ -95,12 +97,12 @@ BOOL CWinStunDlg::OnInitDialog() {
 }
 
 void CWinStunDlg::OnSysCommand(UINT nID, LPARAM lParam) {
-    if((nID & 0xFFF0) == IDM_ABOUTBOX) {
-        CAboutDlg dlgAbout;
-        dlgAbout.DoModal();
-    } else {
-        CDialog::OnSysCommand(nID, lParam);
-    }
+    ///if((nID & 0xFFF0) == IDM_ABOUTBOX) {
+    //    CAboutDlg dlgAbout;
+    //    dlgAbout.DoModal();
+    // } else {
+    CDialog::OnSysCommand(nID, lParam);
+    //}
 }
 
 // If you add a minimize button to your dialog, you will need the code below
@@ -133,20 +135,18 @@ HCURSOR CWinStunDlg::OnQueryDragIcon() {
 
 void CWinStunDlg::OnBnClickedTest() {
     // TODO: Add your control notification handler code here
-    CString& server = mServerName;
     CEdit* display = (CEdit*)GetDlgItem(IDC_RESULT);
-    assert(display);
-    display->SetWindowText(CString(_T("Running...\r\n")));
-	display->UpdateWindow();
-    CEdit* edit = (CEdit*)GetDlgItem(IDC_SERVER);
-    assert(edit);
-    edit->GetWindowText(server);
+    display->SetWindowText(CString(_T("正在获取信息...\r\n")));
+    display->UpdateWindow();
+    //获取服务器地址(可以是Ip:port形式)
+    CString& server = mServerName;
+    GetDlgItem(IDC_SERVER)->GetWindowText(server);
+    char* s = (char*)(LPCTSTR)server;
+
     StunAddress4 stunServerAddr;
-    LPCTSTR str;
-    str = server;
-    char* s;
-    s = (char*)str;
+
     stunParseServerName(s, stunServerAddr);
+
     bool verbose = false;
     StunAddress4 sAddr;
     sAddr.port = 0;
@@ -155,60 +155,64 @@ void CWinStunDlg::OnBnClickedTest() {
     bool hairpin;
     int port = 0;
     NatType stype = stunNatType(stunServerAddr, verbose, &preservePort, &hairpin, port, &sAddr);
+    display->SetWindowText(CString(_T("测试中...\r\n")));
+    display->UpdateWindow();
+
     CString text;
 
     switch(stype) {
         case StunTypeOpen:
-            text = _T("No NAT detected - VoIP should work");
+            text = _T("没有检测到NAT设备,您是直接连接到外网 - p2p可以工作.");
             break;
 
         case StunTypeConeNat:
-            text = _T("Cone Nat detect - VoIP will work with STUN");
+            text = _T("完全锥形NAT(Full Cone NAT) - p2p通过STUN可以工作.");
             break;
 
         case StunTypeRestrictedNat:
-            text = _T("Address restricted NAT detected - VoIP will work with STUN");
+            text = _T("地址受限制锥形NAT(Address restricted NAT) - p2p通过STUN可以工作.");
             break;
 
         case StunTypePortRestrictedNat:
-            text = _T("Port restricted NAT detected - VoIP will work with STUN");
+            text = _T("端口受限制锥形NAT(Port restricted NAT) - p2p通过STUN可以工作.");
             break;
 
         case StunTypeSymNat:
-            text = _T("Symetric - VOIP will NOT work");
+            text = _T("对称型NAT(Symetric NAT) - p2p无法直接工作.");
             break;
 
         case StunTypeSymFirewall:
-            text = _T("Symetric firewall - VOIP will NOT work");
+            text = _T("对称型NAT,有防火墙(Symetric firewall) - p2p无法直接工作.");
             break;
 
         case StunTypeBlocked:
-            text = _T("Could not reach the stun server - check server name is correct");
+            text = _T("不能连接到服务器,请检测服务器名.");
             break;
 
         default:
-            text = _T("Unkown NAT type");
+            text = _T("未知NAT类型");
             break;
     }
 
-    text += _T("\r\n");
+    text += _T("\r\n\r\n");
 
+    /*
     if(preservePort) {
-        text += _T("Preserves port number\r\n");
+        text += _T("端口号将保持\r\n");
     } else {
-        text += _T("Does not preserve port number\r\n");
+        text += _T("端口号无法保持\r\n");
     }
-
+    */
     if(hairpin) {
-        text += _T("Supports hairpin of media\r\n");
+        text += _T("支持应聘中国在线面试");
     } else {
-        text += _T("Does not supports hairpin of media\r\n");
+        text += _T("不支持应聘中国在线面试");
     }
 
+    text += _T("\r\n\r\n");
     CString strAddr;
-    strAddr.Format(_T("Public IP address: %d.%d.%d.%d"),
-                   (sAddr.addr >> 24) & 0xFF, (sAddr.addr >> 16) & 0xFF, (sAddr.addr >> 8) & 0xFF, (sAddr.addr >> 0) & 0xFF
-                  );
+    strAddr.Format(_T("公网IP地址: %d.%d.%d.%d ,端口: %d"),
+                   (sAddr.addr >> 24) & 0xFF, (sAddr.addr >> 16) & 0xFF, (sAddr.addr >> 8) & 0xFF, (sAddr.addr >> 0) & 0xFF, sAddr.port);
     text += strAddr;
     display->SetWindowText(text + CString(_T("\r\n")));
 }
