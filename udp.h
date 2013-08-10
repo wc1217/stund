@@ -15,7 +15,7 @@ typedef int socklen_t;
 
 typedef int socklen_t;
 typedef SOCKET Socket;
-/*
+
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 #define EINPROGRESS             WSAEINPROGRESS
 #define EALREADY                WSAEALREADY
@@ -51,8 +51,7 @@ typedef SOCKET Socket;
 #define EDQUOT                  WSAEDQUOT
 #define ESTALE                  WSAESTALE
 #define EREMOTE                 WSAEREMOTE
-*/
-#define EHOSTDOWN               WSAEHOSTDOWN
+
 typedef LONGLONG Int64; 
 inline int getErrno() { return WSAGetLastError(); }
 

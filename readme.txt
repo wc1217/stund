@@ -1,4 +1,4 @@
-change it to Microsoft Visual Studio 2012
+change it to Microsoft Visual Studio 2003
 
 Running the STUN server:
 ------------------------
